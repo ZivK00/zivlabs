@@ -1,0 +1,15 @@
+{
+  "name": "zivlabs",
+  "version": "0.1.0",
+  "description": "A small, trust-aware core for routing bounded AI work.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node --test",
+    "build": "node --check src/index.mjs && node --check demo.mjs",
+    "demo": "node demo.mjs",
+    "start": "node demo.mjs"
+  }
+}
