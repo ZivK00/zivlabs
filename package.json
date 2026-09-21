@@ -1,15 +1,20 @@
 {
   "name": "zivlabs",
   "version": "0.1.0",
-  "description": "A small, trust-aware core for routing bounded AI work.",
+  "description": "Trust-aware multi-AI workspace architecture with runnable orchestration, context, and delivery contracts.",
   "type": "module",
   "engines": {
     "node": ">=20"
   },
   "scripts": {
-    "test": "node --test",
-    "build": "node --check src/index.mjs && node --check demo.mjs",
-    "demo": "node demo.mjs",
-    "start": "node demo.mjs"
+    "test": "node --test tests/**/*.test.mjs",
+    "typecheck": "node scripts/check-source.mjs",
+    "build": "npm run typecheck",
+    "demo": "npm run demo:multi-ai",
+    "demo:multi-ai": "node demos/multi-ai.mjs",
+    "demo:continue": "node demos/continue-project.mjs",
+    "demo:trust": "node demos/trust-boundaries.mjs",
+    "desktop:demo": "node demos/desktop-shell.mjs",
+    "start": "npm run demo:multi-ai"
   }
 }

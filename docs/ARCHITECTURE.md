@@ -1,23 +1,48 @@
 # Architecture
 
-The core is deliberately split into pure functions. A host application owns
-provider adapters, persistence, process isolation, and user confirmation; this
-package makes their safety decisions explicit and testable.
+ZivLabs has one direction of authority:
 
 ```mermaid
 sequenceDiagram
-  participant U as User intent
-  participant R as Router
-  participant W as Worker surface
+  participant I as Intent
+  participant C as ContextForge
+  participant A as AgentLane
+  participant E as Host execution surface
   participant V as Verifier
   participant D as Delivery gate
-  U->>R: bounded task signature
-  R->>W: route only if trusted and capable
-  W-->>V: candidate plus deterministic evidence
-  V-->>D: verified receipt
-  D-->>U: allow or fail closed
+  I->>C: objective + bounded sources
+  C->>A: task + current grounded handoff
+  A-->>I: block, or selected lane
+  A->>E: route only when capability/health/trust match
+  E->>V: candidate + declared check receipt
+  V->>D: pass/fail evidence
+  D-->>I: allow only if route and handoff remain current
 ```
 
-The route decision is not a delivery decision. A route merely identifies an
-eligible surface. Delivery needs a current handoff, a non-empty change receipt,
-and a passing declared check.
+`packages/zivlabs/src/orchestrator.mjs` composes the public contracts. It does
+not own a provider SDK, a database driver, a sandbox, or delivery side effects.
+Those are host adapters. Keeping them outside the core makes the decision
+boundary testable and prevents a provider-specific special case from spreading
+through the workflow.
+
+## State ownership
+
+| State | Owner | Public V1 implementation |
+| --- | --- | --- |
+| task signature and route | AgentLane | immutable return values |
+| bounded context and handoff | ContextForge | immutable packs and revision comparison |
+| worker confinement | host execution adapter | explicit surface evidence input |
+| candidate verification | verifier adapter | changed-file list plus declared check |
+| delivery decision | delivery gate | pure, fail-closed result |
+| runs, threads, handoffs, provider health | persistence adapter | `MemoryRunStore` fixture |
+
+This separation is deliberate: provider response text cannot make itself a
+delivery receipt, and a successful route cannot bypass verification.
+
+## Desktop shell boundary
+
+`apps/desktop/renderer/shell.mjs` is intentionally host-neutral HTML rendering.
+An Electron host can mount it behind a restrictive preload bridge; a web host
+can use it as a view model. It escapes dynamic text and receives a completed
+mission state. It does not obtain Node, shell, filesystem, credential, or
+provider access.
